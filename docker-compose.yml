@@ -1,0 +1,17 @@
+services:
+  interventions:
+    build: .
+    container_name: clinical-interventions
+    restart: unless-stopped
+    ports:
+      - "3400:8000"          # change the left number to use a different port
+    environment:
+      TZ: America/Jamaica    # used for timestamps; change if needed
+      DB_PATH: /data/interventions.db
+    volumes:
+      - ./data:/data         # the SQLite database lives here; back this folder up
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

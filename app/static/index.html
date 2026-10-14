@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#134B3B">
+  <title>Clinical interventions</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><g transform="rotate(-40 13 13)"><rect x="2" y="8" width="22" height="10" rx="5" fill="#fff"/><path d="M13 8h6a5 5 0 0 1 0 10h-6z" fill="#7CCFB0"/></g></svg>
+      <span>Clinical interventions</span>
+    </div>
+    <nav class="tabs" aria-label="Main">
+      <a href="#/new" data-tab="new">New</a>
+      <a href="#/records" data-tab="records">Records</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- New / edit -->
+    <div id="view-new">
+      <div class="wrap">
+        <div id="edit-banner" class="banner" hidden>
+          <span id="edit-text"></span>
+          <button type="button" class="link" id="edit-cancel">Cancel editing</button>
+        </div>
+        <div class="form-layout">
+          <nav class="secnav" id="secnav" aria-label="Form sections"></nav>
+          <div>
+            <div id="form-sections"></div>
+            <div class="actions">
+              <button type="button" class="btn ghost" id="btn-clear">Clear form</button>
+              <button type="button" class="btn primary" id="btn-save">Save intervention</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Records -->
+    <div id="view-records" hidden>
+      <div class="wrap">
+        <div class="rec-top">
+          <h1>Records</h1>
+          <button type="button" class="btn ghost" id="btn-export">Export CSV</button>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="filters">
+          <div class="field grow"><label for="q">Search</label><input id="q" type="search" placeholder="Initials, MRN, drug, condition, pharmacist"></div>
+          <div class="field"><label for="f-pharmacy">Pharmacy</label><select id="f-pharmacy"><option value="">All</option></select></div>
+          <div class="field"><label for="f-from">From</label><input id="f-from" type="date"></div>
+          <div class="field"><label for="f-to">To</label><input id="f-to" type="date"></div>
+        </div>
+        <div class="rec-head" aria-hidden="true"><span>Date</span><span>Patient</span><span>Drug</span><span>Problem</span><span>Result</span></div>
+        <div id="rec-list"></div>
+      </div>
+    </div>
+  </main>
+
+  <dialog id="detail" aria-labelledby="detail-title"></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/schema.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

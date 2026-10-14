@@ -1,0 +1,17 @@
+services:
+  interventions:
+    image: ghcr.io/psalmpson/clinical-interventions:latest
+    container_name: clinical-interventions
+    restart: unless-stopped
+    ports:
+      - "3400:8000"
+    environment:
+      TZ: America/Jamaica
+      DB_PATH: /data/interventions.db
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
