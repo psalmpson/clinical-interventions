@@ -94,6 +94,14 @@ def to_dict(row: sqlite3.Row) -> Dict[str, Any]:
 
 app = FastAPI(title="Clinical interventions", docs_url="/api/docs", openapi_url="/api/openapi.json")
 
+@app.middleware("http")
+async def no_cache(request, call_next):
+    """Never let browsers or proxies (e.g. Cloudflare) store responses: records are patient-related."""
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 
 @app.get("/api/health")
 def health():
