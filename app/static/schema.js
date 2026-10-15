@@ -32,7 +32,8 @@ const FIELDS = {
     { k: 'disease',   label: 'Disease or condition' },
   ],
   specifics: { k: 'specifics', label: 'Intervention specifics', type: 'textarea', wide: true, rows: 5,
-               ph: 'What you found, what you did and what you advised.' },
+               ph: 'What you found, what you did and what you advised.',
+               hint: 'About 550 characters fit in the box on the Excel form. The full text is always kept in the record.' },
   hours: { k: 'hours', label: 'Time spent (hours)', type: 'number', step: '0.05', min: '0', ph: 'e.g. 0.5' },
 };
 

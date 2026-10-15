@@ -11,8 +11,12 @@ from pathlib import Path
 from typing import Any, Dict
 
 from fastapi import FastAPI, HTTPException, Response
+import re
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+from .pdf_form import render_pdf
+from .xlsx_form import fill_xlsx
 
 import sqlite3
 
@@ -112,6 +116,40 @@ def get_intervention(item_id: int):
     if not row:
         raise HTTPException(404, "Not found")
     return to_dict(row)
+
+
+@app.get("/api/interventions/{item_id}/pdf")
+def intervention_pdf(item_id: int):
+    with closing(connect()) as c:
+        row = c.execute("SELECT * FROM interventions WHERE id = ?", (item_id,)).fetchone()
+    if not row:
+        raise HTTPException(404, "Not found")
+    rec = to_dict(row)
+    f = rec["data"].get("fields", {})
+    safe = lambda v: re.sub(r"[^A-Za-z0-9_-]+", "", str(v or ""))
+    name = "-".join(p for p in ("intervention", str(item_id), safe(f.get("initials")), safe(f.get("date"))) if p)
+    return Response(
+        content=render_pdf(rec),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{name}.pdf"'},
+    )
+
+
+@app.get("/api/interventions/{item_id}/xlsx")
+def intervention_xlsx(item_id: int):
+    with closing(connect()) as c:
+        row = c.execute("SELECT * FROM interventions WHERE id = ?", (item_id,)).fetchone()
+    if not row:
+        raise HTTPException(404, "Not found")
+    rec = to_dict(row)
+    f = rec["data"].get("fields", {})
+    safe = lambda v: re.sub(r"[^A-Za-z0-9_-]+", "", str(v or ""))
+    name = "-".join(p for p in ("intervention", str(item_id), safe(f.get("initials")), safe(f.get("date"))) if p)
+    return Response(
+        content=fill_xlsx(rec),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{name}.xlsx"'},
+    )
 
 
 @app.post("/api/interventions", status_code=201)

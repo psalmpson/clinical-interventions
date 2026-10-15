@@ -28,7 +28,7 @@ function fieldHTML(f) {
   if (f.type === 'textarea') ctl = `<textarea id="${id}" data-field="${f.k}" rows="${f.rows || 3}"${ph}></textarea>`;
   else if (f.type === 'select') ctl = `<select id="${id}" data-field="${f.k}"><option value="">Select</option>${f.options.map(o => `<option>${esc(o)}</option>`).join('')}</select>`;
   else ctl = `<input id="${id}" data-field="${f.k}" type="${f.type || 'text'}"${f.step ? ` step="${f.step}"` : ''}${f.min ? ` min="${f.min}"` : ''}${f.type === 'number' ? ' inputmode="decimal"' : ''}${ph} autocomplete="off">`;
-  return `<div class="field${f.wide ? ' wide' : ''}" data-wrap="${f.k}"><label for="${id}">${esc(f.label)}${f.req ? '<span class="req" aria-hidden="true"> *</span>' : ''}</label>${ctl}</div>`;
+  return `<div class="field${f.wide ? ' wide' : ''}" data-wrap="${f.k}"><label for="${id}">${esc(f.label)}${f.req ? '<span class="req" aria-hidden="true"> *</span>' : ''}</label>${ctl}${f.hint ? `<small class="hint">${esc(f.hint)}</small>` : ''}</div>`;
 }
 
 function optHTML(key, label, ph) {
@@ -352,6 +352,7 @@ function detailHTML(r) {
     <div class="d-actions">
       <button type="button" class="btn danger-ghost" data-del="${r.id}">Delete</button>
       <span class="spacer"></span>
+      <a class="btn ghost" href="/api/interventions/${r.id}/xlsx" download>Download Excel</a>
       <button type="button" class="btn ghost" data-print>Print</button>
       <button type="button" class="btn primary" data-edit="${r.id}">Edit</button>
     </div>`;
