@@ -186,3 +186,97 @@ dialog::backdrop{background:rgba(23,35,31,.5)}
   dialog::backdrop{display:none}
   .d-head{position:static}
 }
+
+/* ===== settings button, tabs, suggestions ===== */
+.settings-btn{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;cursor:pointer;flex:none}
+.settings-btn:hover{background:rgba(255,255,255,.26)}
+.settings-btn.on{background:#fff;color:var(--brand-deep)}
+.tabs .short{display:none}
+@media (max-width:620px){
+  .tabs .long{display:none} .tabs .short{display:inline}
+  .tabs a{padding:.35rem .8rem}
+  .brand span{display:none}
+}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.chips:empty{display:none}
+.chip{font:inherit;font-size:.82rem;padding:.2rem .7rem;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--brand)}
+.chip.on{background:var(--brand-wash);border-color:var(--brand);color:var(--brand-deep);font-weight:600}
+code{background:var(--line-soft);padding:0 .3rem;border-radius:4px;font-size:.9em}
+.btn.danger{background:var(--danger);color:#fff}
+.btn.danger:disabled{opacity:.45;cursor:not-allowed}
+.rep-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+
+/* ===== admin dialogs ===== */
+.adm-card{border:1px solid var(--line);border-radius:12px;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+.adm-card h3{font-family:var(--serif);font-size:1.1rem;font-weight:600}
+.adm-card p{color:var(--muted);font-size:.92rem}
+.adm-card.danger{border-color:#E8B7B1;background:#FFF8F7}
+.adm-row{display:flex;flex-wrap:wrap;gap:.6rem}
+#pin-dialog{width:min(24rem,calc(100vw - 2rem));border-radius:16px}
+.pin-form{padding:1.25rem;display:flex;flex-direction:column;gap:.75rem}
+.pin-form h2{font-family:var(--serif);font-size:1.3rem;font-weight:600}
+.pin-form p{color:var(--muted);font-size:.92rem}
+.pin-form p.pin-err{color:var(--danger);font-weight:600;min-height:1.3em}
+.pin-actions{display:flex;justify-content:flex-end;gap:.6rem}
+@media (max-width:820px){
+  #pin-dialog{width:calc(100vw - 2rem);height:auto;max-height:90dvh;border-radius:16px}
+}
+
+/* ===== monthly report sheet ===== */
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.25rem}
+.sheet-head{text-align:center;font-family:var(--serif)}
+.sheet-head h2{font-size:1.1rem;font-weight:700}
+.sheet-head h3{font-size:1rem;font-weight:700}
+.sheet-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.35rem 1.5rem;margin:1rem 0}
+.sheet-meta div{display:flex;gap:.6rem;align-items:baseline;border-bottom:1px solid var(--line-soft);padding-bottom:.15rem}
+.sheet-meta dt{color:var(--muted);font-size:.85rem;white-space:nowrap}
+.sheet-meta dd{margin:0;font-weight:600}
+.rep-empty{background:var(--amber-wash);color:var(--amber);border-radius:10px;padding:.5rem .9rem;font-weight:600;margin-bottom:1rem}
+.sheet-tables{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1.25rem;align-items:start}
+.sheet h4{font-size:.95rem;font-weight:700;margin-bottom:.4rem}
+table.rep{width:100%;border-collapse:collapse;font-size:.9rem}
+table.rep td,table.rep th{border:1px solid #BFCBC5;padding:.28rem .6rem;text-align:left}
+table.rep th{background:#FFF7A8;font-size:.85rem}
+table.rep .num{text-align:right;width:4.5rem;font-variant-numeric:tabular-nums}
+table.rep tr.total td{background:var(--brand-deep);color:#fff;font-weight:700}
+table.rep tr.group td{background:var(--brand-wash);font-weight:700}
+table.rep tr.head td{font-style:italic;color:var(--muted)}
+table.rep tr.item td:first-child{padding-left:1.1rem}
+.sheet-count{margin-top:1rem;color:var(--muted);font-size:.85rem}
+.sheet-sign{display:none;grid-template-columns:1fr 1.4fr .8fr;gap:1.5rem;margin-top:1.6rem;font-size:.8rem}
+.sheet-sign div{display:flex;flex-direction:column;gap:.2rem}
+.sheet-sign span{border-bottom:1px solid #000;height:1.4rem}
+@media (max-width:820px){
+  .sheet{padding:1rem}
+  .sheet-tables{grid-template-columns:1fr}
+}
+
+/* ===== printing the monthly report ===== */
+@page{size:A4;margin:9mm}
+@media print{
+  body.print-report{background:#fff}
+  body.print-report .top,
+  body.print-report .report-controls,
+  body.print-report .rep-top,
+  body.print-report .no-print,
+  body.print-report .sheet-count,
+  body.print-report #toast{display:none!important}
+  body.print-report main{display:block!important}
+  body.print-report #view-report .wrap{padding:0;max-width:none}
+  body.print-report .sheet{border:0;border-radius:0;padding:0;font-size:8pt}
+  body.print-report .sheet-head h2{font-size:10pt}
+  body.print-report .sheet-head h3{font-size:9pt}
+  body.print-report .sheet-meta{margin:2mm 0 3mm;grid-template-columns:repeat(3,1fr);gap:1mm 6mm}
+  body.print-report .sheet-tables{grid-template-columns:1.15fr 1fr;gap:6mm}
+  body.print-report .sheet h4{font-size:8pt;margin-bottom:1mm}
+  body.print-report table.rep{font-size:6.6pt;line-height:1.1}
+  body.print-report table.rep td,body.print-report table.rep th{padding:.4mm 1.2mm}
+  body.print-report table.rep th{font-size:6.8pt}
+  body.print-report table.rep .num{width:11mm}
+  body.print-report .sheet-sign{display:grid;margin-top:5mm}
+  body.print-report table.rep tr.total td{background:#222!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.print-report table.rep tr.group td{background:#e6e6e6!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.print-report table.rep th{background:#f3f3f3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.print-report .sheet{break-inside:avoid}
+}

@@ -27,8 +27,8 @@ function fieldHTML(f) {
   let ctl;
   if (f.type === 'textarea') ctl = `<textarea id="${id}" data-field="${f.k}" rows="${f.rows || 3}"${ph}></textarea>`;
   else if (f.type === 'select') ctl = `<select id="${id}" data-field="${f.k}"><option value="">Select</option>${f.options.map(o => `<option>${esc(o)}</option>`).join('')}</select>`;
-  else ctl = `<input id="${id}" data-field="${f.k}" type="${f.type || 'text'}"${f.step ? ` step="${f.step}"` : ''}${f.min ? ` min="${f.min}"` : ''}${f.type === 'number' ? ' inputmode="decimal"' : ''}${ph} autocomplete="off">`;
-  return `<div class="field${f.wide ? ' wide' : ''}" data-wrap="${f.k}"><label for="${id}">${esc(f.label)}${f.req ? '<span class="req" aria-hidden="true"> *</span>' : ''}</label>${ctl}${f.hint ? `<small class="hint">${esc(f.hint)}</small>` : ''}</div>`;
+  else ctl = `<input id="${id}" data-field="${f.k}" type="${f.type || 'text'}"${f.suggest ? ` list="dl-${f.suggest}"` : ''}${f.step ? ` step="${f.step}"` : ''}${f.min ? ` min="${f.min}"` : ''}${f.type === 'number' ? ' inputmode="decimal"' : ''}${ph} autocomplete="off">`;
+  return `<div class="field${f.wide ? ' wide' : ''}" data-wrap="${f.k}"><label for="${id}">${esc(f.label)}${f.req ? '<span class="req" aria-hidden="true"> *</span>' : ''}</label>${ctl}${f.suggest ? `<div class="chips" data-chips="${f.suggest}"></div>` : ''}${f.hint ? `<small class="hint">${esc(f.hint)}</small>` : ''}</div>`;
 }
 
 function optHTML(key, label, ph) {
@@ -111,6 +111,7 @@ function fillForm() {
   });
   Object.keys(pads).forEach(k => pads[k].load(state.fields[k]));
   updateCounts();
+  renderChips();
 }
 
 function setEditUI() {
@@ -152,7 +153,10 @@ function bindForm() {
   const root = $('#form-sections');
   root.addEventListener('input', e => {
     const t = e.target;
-    if (t.dataset.field) { state.fields[t.dataset.field] = t.value; t.closest('.field').classList.remove('invalid'); }
+    if (t.dataset.field) {
+      state.fields[t.dataset.field] = t.value; t.closest('.field').classList.remove('invalid');
+      if (t.dataset.field === 'pharmacy') renderChips();
+    }
     else if (t.dataset.note && state.checks[t.dataset.note]) state.checks[t.dataset.note].note = t.value;
   });
   root.addEventListener('change', e => {
@@ -167,6 +171,12 @@ function bindForm() {
   root.addEventListener('click', e => {
     const b = e.target.closest('[data-sigclear]');
     if (b) pads[b.dataset.sigclear].clear();
+    const chip = e.target.closest('[data-fill]');
+    if (chip) {
+      const k = chip.dataset.fill, el = $(`[data-field="${k}"]`);
+      state.fields[k] = chip.dataset.value; el.value = chip.dataset.value;
+      el.closest('.field').classList.remove('invalid'); renderChips();
+    }
   });
 
   $('#secnav').addEventListener('click', e => {
@@ -211,6 +221,7 @@ async function save() {
     });
     if (!res.ok) throw new Error(await res.text());
     remember(state.fields);
+    loadPharmacies();
     if (editingId != null) {
       editingId = null; state = blank(); fillForm(); setEditUI();
       location.hash = '#/records';
@@ -350,7 +361,7 @@ function detailHTML(r) {
       <p class="d-foot">Record #${r.id}. Created ${esc(new Date(r.created_at).toLocaleString())}${r.updated_at !== r.created_at ? `, edited ${esc(new Date(r.updated_at).toLocaleString())}` : ''}.</p>
     </div>
     <div class="d-actions">
-      <button type="button" class="btn danger-ghost" data-del="${r.id}">Delete</button>
+      <button type="button" class="btn danger-ghost" data-del="${r.id}" title="Needs the admin PIN">Delete (admin)</button>
       <span class="spacer"></span>
       <a class="btn ghost" href="/api/interventions/${r.id}/xlsx" download>Download Excel</a>
       <button type="button" class="btn ghost" data-print>Print</button>
@@ -382,9 +393,12 @@ function bindRecords() {
       return;
     }
     const del = e.target.closest('[data-del]');
-    if (del && confirm('Delete this intervention record? This cannot be undone.')) {
-      const res = await fetch('/api/interventions/' + del.dataset.del, { method: 'DELETE' });
-      if (res.ok) { dlg.close(); toast('Record deleted.'); loadRecords(); } else toast('Could not delete the record.', 'error');
+    if (del) {
+      if (!(await window.CIAdmin.ensure())) return;          // deleting needs the admin PIN
+      if (!confirm('Delete this intervention record? This cannot be undone.')) return;
+      const res = await window.CIAdmin.fetch('/api/interventions/' + del.dataset.del, { method: 'DELETE' });
+      if (res.ok) { dlg.close(); toast('Record deleted.'); loadRecords(); loadPharmacies(); }
+      else toast(res.status === 403 || res.status === 429 ? 'Wrong or missing admin PIN.' : 'Could not delete the record.', 'error');
     }
   });
   $('#btn-export').addEventListener('click', () => exportCSV(filtered()));
@@ -414,15 +428,46 @@ function exportCSV(list) {
 
 /* ---------- routing ---------- */
 function route() {
-  const onRecords = location.hash.startsWith('#/records');
-  $('#view-new').hidden = onRecords;
-  $('#view-records').hidden = !onRecords;
-  $$('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.tab === (onRecords ? 'records' : 'new')));
-  if (onRecords) loadRecords();
+  const h = location.hash;
+  const view = h.startsWith('#/records') ? 'records' : h.startsWith('#/report') ? 'report' : 'new';
+  $('#view-new').hidden = view !== 'new';
+  $('#view-records').hidden = view !== 'records';
+  $('#view-report').hidden = view !== 'report';
+  document.body.classList.toggle('print-report', view === 'report');
+  $$('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.tab === view));
+  if (view === 'records') loadRecords();
+  if (view === 'new') loadPharmacies();
+  if (window.CI && window.CI.onShow) window.CI.onShow(view);
   window.scrollTo(0, 0);
 }
 
-buildForm(); bindForm(); bindRecords(); fillForm(); setEditUI();
+/* ---------- pharmacy suggestions ---------- */
+let pharmacyNames = [];
+async function loadPharmacies() {
+  try {
+    const res = await fetch('/api/pharmacies', { cache: 'no-store' });
+    if (res.ok) pharmacyNames = (await res.json()).map(p => p.name);
+  } catch { /* suggestions are optional */ }
+  renderChips();
+}
+function renderChips() {
+  const dl = $('#dl-pharmacy');
+  if (dl) dl.innerHTML = pharmacyNames.map(n => `<option value="${esc(n)}"></option>`).join('');
+  const box = $('[data-chips="pharmacy"]');
+  if (!box) return;
+  const cur = String(state.fields.pharmacy || '').trim().toLowerCase();
+  box.innerHTML = pharmacyNames.slice(0, 6).map(n =>
+    `<button type="button" class="chip${n.toLowerCase() === cur ? ' on' : ''}" data-fill="pharmacy" data-value="${esc(n)}">${esc(n)}</button>`).join('');
+}
+
+const monthLabel = v => {
+  if (!v || v === 'all') return 'All months';
+  const [y, m] = v.split('-');
+  return new Date(+y, +m - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+};
+window.CI = { $, $$, esc, toast, today, fmtDate, monthLabel, loadPharmacies, reloadRecords: () => loadRecords(), onShow: null };
+
+buildForm(); bindForm(); bindRecords(); fillForm(); setEditUI(); loadPharmacies();
 window.addEventListener('hashchange', route);
 route();
 })();

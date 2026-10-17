@@ -17,7 +17,7 @@ const SCHEMA = {
 const FIELDS = {
   patient: [
     { k: 'date',     label: 'Date', type: 'date', req: true },
-    { k: 'pharmacy', label: 'Pharmacy', req: true },
+    { k: 'pharmacy', label: 'Pharmacy', req: true, suggest: 'pharmacy' },
     { k: 'ward',     label: 'Ward' },
     { k: 'mrn',      label: 'Pharmacy MRN' },
     { k: 'initials', label: 'Patient initials', req: true },
@@ -54,7 +54,9 @@ const CHECKS = {
       { title: 'Dosing', items: [
         ['dose_low', 'Dose too low or frequency inadequate'],
         ['dose_high', 'Dose too high or frequency too often'],
-        ['dose_duration', 'Duration inappropriate'] ] },
+        ['dose_duration', 'Duration inappropriate'],
+        ['dose_missing_freq', 'Missing frequency'],
+        ['dose_missing_duration', 'Missing duration'] ] },
       { title: 'Drug use', items: [
         ['use_wrongdose', 'Wrong dose administered'],
         ['use_wrongdrug', 'Wrong drug administered'],
@@ -100,6 +102,8 @@ const CHECKS = {
       ['change_interval', 'Change dosing interval', 'New interval'],
       ['tdm', 'Therapeutic drug monitoring'],
       ['education', 'Patient education or counseling'],
+      ['add_frequency', 'Add frequency'],
+      ['add_duration', 'Add duration'],
     ] } ],
   },
   result: {

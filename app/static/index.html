@@ -16,7 +16,11 @@
     <nav class="tabs" aria-label="Main">
       <a href="#/new" data-tab="new">New</a>
       <a href="#/records" data-tab="records">Records</a>
+      <a href="#/report" data-tab="report"><span class="long">Monthly report</span><span class="short">Report</span></a>
     </nav>
+    <button type="button" class="settings-btn" id="btn-settings" aria-label="Settings" title="Settings (admin PIN required)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </header>
 
   <main>
@@ -58,12 +62,36 @@
         <div id="rec-list"></div>
       </div>
     </div>
+
+    <!-- Monthly report -->
+    <div id="view-report" hidden>
+      <div class="wrap">
+        <div class="rec-top">
+          <h1>Monthly report</h1>
+          <div class="rep-actions">
+            <a class="btn ghost" id="rep-xlsx" href="/api/report/xlsx" download>Download Excel</a>
+            <button type="button" class="btn primary" id="rep-print">Print</button>
+          </div>
+        </div>
+        <div class="filters report-controls">
+          <div class="field"><label for="rep-month">Month</label><select id="rep-month"></select></div>
+          <div class="field grow"><label for="rep-pharmacy">Pharmacy</label><select id="rep-pharmacy"></select></div>
+          <div class="field grow"><label for="rep-submitted">Submitted by</label><input id="rep-submitted" type="text" placeholder="Name for the report" autocomplete="off"></div>
+        </div>
+        <div id="report-sheet"></div>
+      </div>
+    </div>
   </main>
 
   <dialog id="detail" aria-labelledby="detail-title"></dialog>
+  <dialog id="admin-dialog" aria-labelledby="adm-title"></dialog>
+  <dialog id="pin-dialog" aria-labelledby="pin-title"></dialog>
+  <datalist id="dl-pharmacy"></datalist>
   <div id="toast" role="status" aria-live="polite"></div>
 
   <script src="/schema.js"></script>
   <script src="/app.js"></script>
+  <script src="/report.js"></script>
+  <script src="/admin.js"></script>
 </body>
 </html>
